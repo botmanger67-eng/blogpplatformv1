@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Blog Home{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% extends "base.html" %}
+    {% block content %}
+    <div class="container">
+        <header class="page-header">
+            <h1>Welcome to the Blog</h1>
+            <p>Read, write, and share your thoughts.</p>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('posts.create_post') }}" class="btn btn-primary">Create New Post</a>
+        {% endif %}
+
+        <section class="posts">
+            <h2>Recent Posts</h2>
+            {% if posts %}
+                {% for post in posts %}
+                    <article class="post-preview">
+                        <h3><a href="{{ url_for('posts.view_post', post_id=post.id) }}">{{ post.title }}</a></h3>
+                        <p class="post-meta">
+                            By <a href="#">{{ post.author.username }}</a> on {{ post.date_posted.strftime('%B %d, %Y') }}
+                        </p>
+                        <p class="post-summary">{{ post.content[:200] | striptags }}...</p>
+                        <a href="{{ url_for('posts.view_post', post_id=post.id) }}" class="read-more">Read More</a>
+                    </article>
+                {% endfor %}
+                <div class="pagination">
+                    {% if pagination.has_prev %}
+                        <a href="{{ url_for('posts.index', page=pagination.prev_num) }}">Previous</a>
+                    {% endif %}
+                    {% if pagination.has_next %}
+                        <a href="{{ url_for('posts.index', page=pagination.next_num) }}">Next</a>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p>No posts yet.</p>
+            {% endif %}
+        </section>
+    </div>
+    {% endblock %}
+</body>
+</html>
