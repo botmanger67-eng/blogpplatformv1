@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - SECRET_KEY=${SECRET_KEY:-supersecretkey}
+      - DATABASE_URL=postgresql://flask_blog:flask_blog_pass@db:5432/flask_blog_db
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - blog_network
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: flask_blog
+      POSTGRES_PASSWORD: flask_blog_pass
+      POSTGRES_DB: flask_blog_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flask_blog"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - blog_network
+
+volumes:
+  postgres_data:
+
+networks:
+  blog_network:
+    driver: bridge
