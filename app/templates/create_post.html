@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="container">
+    <h2>{{ title }}</h2>
+    <form method="POST" action="{{ action_url }}">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.title.label(class="form-label") }}
+            {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else "")) }}
+            {% for error in form.title.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.body.label(class="form-label") }}
+            {{ form.body(class="form-control" + (" is-invalid" if form.body.errors else ""), rows=10) }}
+            {% for error in form.body.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary">{{ submit_text }}</button>
+        <a href="{{ url_for('posts.index') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}
