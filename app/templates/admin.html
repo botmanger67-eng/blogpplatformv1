@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard - Blog{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Admin Navigation -->
+        <nav class="admin-nav">
+            <h1>Admin Dashboard</h1>
+            <div class="admin-nav-links">
+                <span>Logged in as {{ current_user.username }}</span>
+                <a href="{{ url_for('posts.index') }}">View Site</a>
+                <a href="{{ url_for('auth.logout') }}">Logout</a>
+            </div>
+        </nav>
+
+        <!-- Stats Cards -->
+        <div class="admin-stats">
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <p>{{ stats.total_users }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Posts</h3>
+                <p>{{ stats.total_posts }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Comments</h3>
+                <p>{{ stats.total_comments }}</p>
+            </div>
+        </div>
+
+        <!-- Recent Posts -->
+        <section class="admin-section">
+            <h2>Recent Posts</h2>
+            {% if posts %}
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in posts %}
+                            <tr>
+                                <td>{{ post.title }}</td>
+                                <td>{{ post.author.username }}</td>
+                                <td>{{ post.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    <a href="{{ url_for('posts.edit_post', post_id=post.id) }}">Edit</a>
+                                    <form action="{{ url_for('posts.delete_post', post_id=post.id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" onclick="return confirm('Delete this post?')">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No posts yet.</p>
+            {% endif %}
+        </section>
+
+        <!-- Users List -->
+        <section class="admin-section">
+            <h2>Users</h2>
+            {% if users %}
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    {% if user.is_admin %}
+                                        <span>Admin</span>
+                                    {% else %}
+                                        <form action="{{ url_for('admin.promote', user_id=user.id) }}" method="POST" style="display:inline;">
+                                            <button type="submit">Promote to Admin</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No users registered.</p>
+            {% endif %}
+        </section>
+
+        <!-- Pending Comments (if applicable) -->
+        <section class="admin-section">
+            <h2>Recent Comments</h2>
+            {% if comments %}
+                <ul class="admin-comments">
+                    {% for comment in comments %}
+                        <li>
+                            <p>{{ comment.content[:50] }}...</p>
+                            <small>by {{ comment.author.username }} on {{ comment.post.title }}</small>
+                            <form action="{{ url_for('comments.delete_comment', comment_id=comment.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" onclick="return confirm('Delete this comment?')">Delete</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No comments yet.</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <footer class="admin-footer">
+        <p>&copy; 2025 Blog Platform. All rights reserved.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
